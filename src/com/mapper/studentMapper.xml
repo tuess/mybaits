@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--普通方式这里填该xml文件的包名，接口方法要将这里的namespace改为接口的包名-->
+<mapper namespace="com.mapper.StudentMapper">
+
+    <!--sql片段，将经常给用的sql语句提出来放在sql标签中，再以后要用到的地方用include标签，通过id引用，如果需要跨文件引用，需要在前面加上包名-->
+    <sql id="selectAllStudent">
+        select * from student
+    </sql>
+
+    <!--mybatis约定，输入输出参数在形式上都只能有一个-->
+    <select id="queryStudentById" resultType="com.entity.Student" parameterType="int">
+    --#{}中可以写任意值,一般还是与属性名相同,会自动给String类型加上单引号,还可以防止sql注入,#{id}也可以写成${value}的形式,
+    -- 再传入简单类型时中间的值只能是value,原样输出,适合于动态排序,需要单引号的话要自己加
+    -- 两者都可以放入级联属性,例如student.address (parameterType如果传入了一个类,下面的属性就可以不用写最开始的类名)
+      select * from student where id = #{id}
+    </select>
+
+    <insert id="addStudent" parameterType="com.entity.Student" >
+      insert into student(id,name,sex) values (#{id},#{name},#{sex})
+    </insert>
+
+    <delete id="deleteStudentById" parameterType="int">x
+      delete from student where id = #{id}
+    </delete>
+
+    <update id="updateStudent" parameterType="com.entity.Student">
+      update student set id=#{id},name=#{name},sex=#{sex} where id=#{id}
+    </update>
+
+    <!--无论查询结果是一个还是多个（Student，List（Student）），在mapper.xml中resultType只写一个-->
+    <select id="queryAllStudent" resultType="com.entity.Student" >
+      select * from student
+    </select>
+
+    <select id="queryAllStudentOrderByColumn" parameterType="String" resultType="com.entity.Student">
+        select * from student order by ${value} desc
+    </select>
+    
+    <select id="queryAllStudentOrderByIdOrName" parameterType="com.entity.Student" resultType="com.entity.Student">
+        select * from student where id like #{id} or name like '%${name}%'
+    </select>
+
+    <select id="queryAllStudentOrderByIdOrNameWithHashMap" parameterType="HashMap" resultType="com.entity.Student">
+        select * from student where id like #{id} or name like '%${name}%'
+    </select>
+
+    <!--调用存储过程实现查询,statementType="CALLABLE",如需传参，需要指定参数名，jdbcType（数据库的参数类型）和mode（输入参数还是输出参数）
+     存储过程的输入参数，在mybatis用HashMap来传递,取值也是用HashMap的get()方法-->
+    <select id="queryStudentWithProcedure" statementType="CALLABLE">
+        {call showTable()}
+    </select>
+
+    <!--输出为HashMap,返回一个HashMap对应一条数据,全部返回需要二维HashMap-->
+    <select id="queryStudentOutByHashMap" resultType="HashMap">
+        select id,name from student
+    </select>
+
+    <!--字段名与属性名不一致的情况，采用resultMap方式解决-->
+    <select id="queryStudentWithAnotherName" parameterType="int" resultMap="queryStudent">
+        select id,name from student where id=#{id}
+    </select>
+    <resultMap id="queryStudent" type="com.entity.Student">
+        <!--指定类中s属性和表中字段的对应关系-->
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+    </resultMap>
+
+    <!--字段名与属性名不一致的情况，采用HashMap方式解决-->
+    <select id="queryStudentWithHashMap" parameterType="int" resultType="com.entity.Student">
+-- 通过字段名后面加空格与属性名配对起来
+        select id 'id',name 'name' from student where id=#{id}
+    </select>
+    
+    <!--动态sql语句-->
+    <select id="queryStudentByNameWithTag" parameterType="com.entity.Student" resultType="com.entity.Student">
+        select * from student where
+        <if test="name!=null and name!=''">
+            name=#{name}
+        </if>
+    </select>
+
+    <!--动态sql语句，用where语句，加上where会自动处理if语句前的and-->
+    <select id="queryStudentWithTag" parameterType="com.entity.Student" resultType="com.entity.Student">
+        select * from student
+        <where>
+            <if test="id!=null and id!=''">
+                 and id=#{id}
+            </if>
+            <if test="name!=null and name!=''">
+                 and name=#{name}
+            </if>
+        </where>
+    </select>
+
+    <!--foreach解析传进来的数组,列表,对象,对象数组等,数组固定的写array，集合固定的写list，对象写属性名，对象数组写Object[],open和close是sql语句传入的左右部分，separator是以什么符号分割各项，item是每一项的名称-->
+    <select id="queryStudentWithForeach" parameterType="int[]" resultType="com.entity.Student">
+        select * from student
+        <where>
+            <if test="array!=null and array.length">
+                <foreach collection="array" open="and id in(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <!--通过业务扩展类的形式实现一对一查询-->
+    <select id="queryStudentByIdWithOO" parameterType="int" resultType="com.entity.StudentBusinsess">
+        select * from student left join studentcard on student.id=studentcard.cardid where id=#{id}
+    </select>
+
+    <!--通过resultMap的形式实现一对一查询-->
+    <select id="queryStudentResultMapByIdWithOO" parameterType="int" resultMap="studentcardmap">
+        select * from student left join studentcard on student.id=studentcard.cardid where id=#{id}
+    </select>
+    <!--这里的type就是整个查询语句的返回值-->
+    <resultMap id="studentcardmap" type="com.entity.Student">
+        <!--学生的信息-->
+        <id property="id" column="id"/>
+        <id property="name" column="name"/>
+        <id property="sex" column="sex"/>
+        <!--一对一时,对象成员用association,javaType指定该属性的类型-->
+        <association property="studentCard" javaType="com.entity.StudentCard">
+            <id property="cardid" column="cardid"/>
+            <result property="cardinfo" column="cardinfo"/>
+        </association>
+    </resultMap>
+
+    <!--一对多-->
+    <select id="queryClassAndStudents" parameterType="int" resultMap="studentclassmap">
+         select studentclass.*,student.* from student inner join studentclass on student.classid=studentclass.classid where studentclass.classid=#{classid}
+    </select>
+    <resultMap id="studentclassmap" type="com.entity.StudentClass">
+        <id property="classid" column="classid"/>
+        <result property="classname" column="classname"/>
+        <!--一对多时，对象成员用collection,属性类型用javaType，属性的元素类型用ofType-->
+        <collection property="students" ofType="com.entity.Student">
+            <id property="id" column="id"/>
+            <result property="name" column="name"/>
+            <result property="sex" column="sex"/>
+        </collection>
+    </resultMap>
+
+</mapper>

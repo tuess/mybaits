@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?> <!DOCTYPE configuration  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <!--引入外部数据库配置文件-->
+    <properties resource="db.properties"/>
+
+   <!-- 全局设置在此处通过settings标签设置
+    <settings>
+        <setting name="cacheEnabled" value="false"/>
+    </settings>-->
+
+    <!--设置单个/多个别名,不区分大小写-->
+    <!--<typeAliases>
+        &lt;!&ndash;单个别名&ndash;&gt;
+        <typeAlias type="com.entity.Student" alias="student"/>
+        &lt;!&ndash;批量定义别名,会将该包里的所有类批量定义别名&ndash;&gt;
+        <package name="com.entity"/>
+    </typeAliases>-->
+    <!--可以配置多个environment信息，通过default的id切换 -->
+
+    <!--配置转换器-->
+    <!--<typeHandlers>
+        <typeHandler handler="com.converter.BooleanAndIntConverter" javaType="Boolean" jdbcType="integer"/>
+    </typeHandlers>-->
+
+    <environments default="development">
+        <environment id="development">
+            <!--事务提交方式：JDBC，利用JDBC方式处理事务
+            MANAGED：将事务交给其它组件去管理（spring），默认使用完后会关闭连接
+            可以通过<property name="closeConnection" value="false"/>来设置不关闭-->
+            <transactionManager type="JDBC"/>
+            <!--数据源类型：POOLED，使用连接池，UNPOOLED，不使用连接池，使用传统的JDBC模式
+                 JNDI：从tomcat种获取一个内置的连接池-->
+            <dataSource type="POOLED">
+                <!--配置数据库-->
+                <property name="driver" value="${driver}"/>
+                <property name="url" value="${url}"/>
+                <property name="username" value="${username}"/>
+                <property name="password" value="${password}"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+    <mappers>
+        <!--加载映射文件-->
+        <mapper resource="com/mapper/studentMapper.xml"/>
+    </mappers>
+</configuration>
