@@ -131,6 +131,7 @@
     <select id="queryClassAndStudents" parameterType="int" resultMap="studentclassmap">
          select studentclass.*,student.* from student inner join studentclass on student.classid=studentclass.classid where studentclass.classid=#{classid}
     </select>
+
     <resultMap id="studentclassmap" type="com.entity.StudentClass">
         <id property="classid" column="classid"/>
         <result property="classname" column="classname"/>
