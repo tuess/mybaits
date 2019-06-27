@@ -98,4 +98,5 @@ MyBatis 主要提供了以下CRUD注解：
       }  
   } 
 ```  
-可以使用```@MapperScan({"com.kfit.demo","com.kfit.user"})```方式指定多个包  
+
+可以使用 @MapperScan({"com.kfit.demo","com.kfit.user"}) 方式指定多个包  
