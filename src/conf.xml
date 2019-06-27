@@ -44,5 +44,6 @@
     <mappers>
         <!--加载映射文件-->
         <mapper resource="com/mapper/studentMapper.xml"/>
+        <!--<mapper class="com.mapper.StudentMapper"/>-->
     </mappers>
 </configuration>

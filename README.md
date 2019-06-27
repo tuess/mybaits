@@ -39,4 +39,63 @@ conf.xml:配置数据库信息和需要加载的映射文件，可以将数据�
 ## 匹配的过程：（约定的过程）
 1.根据 接口名 找到 mapper.xml文件（根据的是namespace=接口全类名）  
 2.根据 接口的方法名 找到 mapper.xml文件中的SQL标签 （方法名=SQL标签Id值）  
-执行过程：```StudentMapper studentMapper = session.getMapper(StudentMapper.class) ;  studentMapper.方法();```
+执行过程：  
+```StudentMapper studentMapper = session.getMapper(StudentMapper.class) ;  studentMapper.方法();```  
+
+## 注解  
+MyBatis 主要提供了以下CRUD注解：
+
+@Select
+@Insert
+@Update
+@Delete  
+
+使用方式如下：  
+```
+@Insert(" insert into student(id,name,sex) values (#{id},#{name},#{sex}) ")
+    void addStudentByInterface(Student student);
+```    
+映射注解：  
+
+@Results 用于填写结果集的多个字段的映射关系.
+@Result 用于填写结果集的单个字段的映射关系.
+@ResultMap 根据ID关联XML里面的\<resultMap>.  
+
+使用方式如下：  
+```  
+@Select("select * from student")
+    @Results({
+            @Result(property = "id" ,column = "id"),
+            @Result(property = "name",column = "name"),
+            @Result(property = "sex",column = "sex"),
+            @Result(property = "studentCard.cardid",column = "classid")
+    })
+    List<Student> queryAllStudentByInterface();
+```  
+使用时需要在mybaits的配置文件中配置接口的全列名，如下：  
+```
+ <mappers>
+        <!--加载映射文件-->
+        <mapper resource="com/mapper/studentMapper.xml"/>
+        <mapper class="com.mapper.StudentMapper"/>
+    </mappers>
+```    
+
+如果既使用实体类映射xml文件又使用注解的话，就不用在mybaits的配置文件中配置接口的全列名，因为虽然映射文件不在包中，但是映射文件绑定了接口，而使用实体类映射的方式的话，映射文件必须先配置，所以相当于接口被配置进去了，否则会报Type interface com.mapper.StudentMapper is already known to the MapperRegistry的错  
+
+
+在springboot中使用mybaits，为了让接口能够让别的类进行引用，有两种方式  
++ 使用@Mapper注解  
+  缺点是要求每一个mapper类都需要添加此注解
++ 使用@MapperScan注解  
+  通过使用@MapperScan可以指定要扫描的Mapper类的包的路径，例如：
+  ```
+  @SpringBootApplication  
+  @MapperScan("com.kfit.mapper")  
+  public class App {  
+      public static void main(String[] args) {  
+         SpringApplication.run(App.class, args);  
+      }  
+  } 
+```  
+可以使用```@MapperScan({"com.kfit.demo","com.kfit.user"})```方式指定多个包  

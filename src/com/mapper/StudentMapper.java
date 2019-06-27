@@ -3,6 +3,9 @@ package com.mapper;
 import com.entity.Student;
 import com.entity.StudentBusinsess;
 import com.entity.StudentClass;
+import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Result;
+import org.apache.ibatis.annotations.Results;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.HashMap;
@@ -68,4 +71,22 @@ public interface StudentMapper {
 
     //一对多
     StudentClass queryClassAndStudents(int classid);
+
+    //使用接口开发添加学生
+    @Insert(" insert into student(id,name,sex) values (#{id},#{name},#{sex}) ")
+    void addStudentByInterface(Student student);
+
+    //使用接口查询全部学生（@results是在查询SQL的基础上，指定返回的结果集的映射关系，其中property表示实体对象的属性名，column表示对应的数据库字段名。）
+    @Select("select * from student")
+    @Results({
+            @Result(property = "id" ,column = "id"),
+            @Result(property = "name",column = "name"),
+            @Result(property = "sex",column = "sex"),
+            @Result(property = "studentCard.cardid",column = "classid")
+    })
+    List<Student> queryAllStudentByInterface();
+
+//@Results 用于填写结果集的多个字段的映射关系.
+//@Result 用于填写结果集的单个字段的映射关系.
+//@ResultMap 根据ID关联XML里面<resultMap>.
 }

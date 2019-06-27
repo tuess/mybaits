@@ -338,7 +338,44 @@ public class TestMybatisSenior {
         sqlSession.close();
     }
 
+//    使用注解添加学生
+    public static void addStudentByInterface() throws IOException {
+        //加载mybatis配置文件（为了访问数据库）
+        Reader reader = Resources.getResourceAsReader("conf.xml");
+        //创建session工厂
+        SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+        SqlSession sqlSession = sqlSessionFactory.openSession();
+        //实例化一个要增加的对象
+        Student student = new Student(100013, "小灰灰", "男");
+        //拿到接口,返回查询结果集
+        StudentMapper studentMapper = sqlSession.getMapper(StudentMapper.class);
+        //执行接口中的方法
+        studentMapper.addStudentByInterface(student);
+        //提交
+        sqlSession.commit();
+        //打印结果集
+        System.out.println("增加成功");
+        sqlSession.close();
+    }
+
+//    使用接口查询全部学生
+    public static void queryAllStudentByInterface() throws IOException {
+        //加载mybatis配置文件（为了访问数据库）
+        Reader reader = Resources.getResourceAsReader("conf.xml");
+        //创建session工厂
+        SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+        SqlSession sqlSession = sqlSessionFactory.openSession();
+        //拿到接口,返回查询结果集
+        StudentMapper studentMapper = sqlSession.getMapper(StudentMapper.class);
+        //执行接口中的方法
+        List<Student> student = studentMapper.queryAllStudentByInterface();
+        //打印结果集
+        System.out.println(student);
+        sqlSession.close();
+    }
+
     public static void main(String[] args) throws IOException {
+//        可以在main方法中定义getMapper，然后每一个方法在main中调用的时候传mapper进去
 //        queryStudentById();
 //        queryAllStudent();
 //        addStudent();
@@ -356,6 +393,8 @@ public class TestMybatisSenior {
 //        queryStudentWithForeach();
 //        queryStudentByIdWithOO();
 //        queryStudentResultMapByIdWithOO();
-        queryClassAndStudents();
+//        queryClassAndStudents();
+//        addStudentByInterface();
+        queryAllStudentByInterface();
     }
 }
